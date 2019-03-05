@@ -1,0 +1,35 @@
+#!/bin/sh /etc/rc.common                      
+# Copyright (C)  yunlong Wang 2019.03.04      
+# script for filemanager service start or stop                
+                                                              
+START=90                                                      
+STOP=90                                                       
+                                                                                                    
+boot() {                                                                                             
+        rm -rf /tmp/filemanager                                                                           
+        mkdir /tmp/filemanager                                                                            
+        cp /overlay/usr/bin/filemanager /tmp/filemanager/filemanager                                      
+        sleep 10                                                                                          
+        cp /etc/filemanager.db /tmp/filemanager/filemanager.db
+        sleep 1
+        start "$@"                                                                                                                               
+}                                                                                                      
+                                                                                                      
+start() {                                                                                             
+        config_load  filemanager                                                                      
+        enabled=$(uci get filemanager.config.enabled)                                                 
+        port=$(uci get filemanager.config.port)                                                       
+        database=$(uci get filemanager.config.database)                                               
+        scope=$(uci get filemanager.config.scope)
+        base_url=$(uci get filemanager.config.base_url)                                                    
+                                                                                                      
+        [ "${enabled}" == "1" ] || return                                                                                                                                                           
+        /tmp/filemanager/filemanager  --port $port --database  $database  --scope $scope --baseurl $base_url  >/dev/null 2>/dev/null &                                                                                                   
+}                                                   
+                                                              
+stop() {                                                    
+        killall filemanager >/dev/null 2>/dev/null &          
+}                                                             
+                                                                                                    
+                                                                                                  
+                                                                                              
